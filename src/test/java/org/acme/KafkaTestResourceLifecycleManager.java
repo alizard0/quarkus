@@ -1,7 +1,7 @@
 package org.acme;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-import io.smallrye.reactive.messaging.memory.InMemoryConnector;
+import io.smallrye.reactive.messaging.providers.connectors.InMemoryConnector;
 
 import java.util.HashMap;
 import java.util.Map;
