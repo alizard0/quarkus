@@ -34,9 +34,19 @@ export access_token=$(\
  )
 ```
 
-Using the access_token, do the request.
+Using the access_token, do the request and it should return 200 because Alice has user role.
 ```shell script
 curl -v -X GET \
   http://localhost:8080/api/users/me \
   -H "Authorization: Bearer "$access_token
 ```
+
+Using the access_token, do the request and it should return 403 because Alice does not have superuser role
+```shell script
+curl -v -X GET \
+  http://localhost:8080/api/users/me \
+  -H "Authorization: Bearer "$access_token
+```
+
+For roles please login on keycloak and use the quarkus realm.
+http://localhost:8080/q/dev/io.quarkus.quarkus-oidc/provider
