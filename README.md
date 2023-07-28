@@ -1,8 +1,11 @@
 # getting-started
-
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
-
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+
+## OpenID Connect authorization code flow mechanism for protecting web applications
+https://quarkus.io/guides/security-oidc-code-flow-authentication
+
+https://es.quarkus.io/guides/security-openid-connect-dev-services
 
 ## Running the application in dev mode
 
@@ -11,50 +14,29 @@ You can run your application in dev mode that enables live coding using:
 ./mvnw compile quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
 
-## Packaging and running the application
+## Access Keycloak
+Go to development dashboard at http://localhost:8080/q/dev/ and click OIDC Provider (http://localhost:8080/q/dev/io.quarkus.quarkus-oidc/provider)
+This keycloak is already configured for your development and test environments.
 
-The application can be packaged using:
+## GET /api/users/me
+Perform a GET request against `/api/users/me` using `alice` user. In keycloak, Alice was created with admin and user roles.
+http://localhost:32798/admin/master/console/#/quarkus/users/ca2214b6-e624-4bb9-93dd-81a9475a2630/settings
+
+To get alice password to perform the request: http://localhost:32798/admin/master/console/#/quarkus/users/ca2214b6-e624-4bb9-93dd-81a9475a2630/credentials
+
 ```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using: 
-```shell script
-./mvnw package -Pnative
+export access_token=$(\
+    curl --insecure -X POST http://localhost:32798/realms/quarkus/protocol/openid-connect/token \
+    --user backend-service:secret \
+    -H 'content-type: application/x-www-form-urlencoded' \
+    -d 'username=alice&password=alice&grant_type=password' | jq --raw-output '.access_token' \
+ )
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
+Using the access_token, do the request.
 ```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
+curl -v -X GET \
+  http://localhost:8080/api/users/me \
+  -H "Authorization: Bearer "$access_token
 ```
-
-You can then execute your native executable with: `./target/getting-started-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
-
-## Related Guides
-
-- RESTEasy Reactive ([guide](https://quarkus.io/guides/resteasy-reactive)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-
-## Provided Code
-
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
